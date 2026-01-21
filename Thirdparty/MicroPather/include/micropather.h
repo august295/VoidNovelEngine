@@ -75,6 +75,7 @@ distribution.
 #elif defined (__GNUC__) && (__GNUC__ >= 3 )
 	#include <stdint.h>
 	#include <stdlib.h>
+    #include <string.h>
 	typedef uintptr_t		MP_UPTR;
 #else
 	// Assume not 64 bit pointers. Get a new compiler.

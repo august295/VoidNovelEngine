@@ -12,9 +12,40 @@
 #include <sstream>
 #include <fstream>
 #include <codecvt>
-#include <corecrt_io.h>
 
-#include <Windows.h>
+#ifdef _WIN32
+    #include <corecrt_io.h>
+    #include <Windows.h>
+#else
+    #include <iconv.h>
+
+static std::string iconv_convert(
+    const char* from,
+    const char* to,
+    const char* input,
+    size_t input_len)
+{
+    iconv_t cd = iconv_open(to, from);
+    if (cd == (iconv_t)-1)
+        return {};
+
+    size_t in_bytes = input_len;
+    size_t out_bytes = in_bytes * 4 + 4;
+
+    std::vector<char> out(out_bytes);
+    char* inbuf = const_cast<char*>(input);
+    char* outbuf = out.data();
+
+    if (iconv(cd, &inbuf, &in_bytes, &outbuf, &out_bytes) == (size_t)-1)
+    {
+        iconv_close(cd);
+        return {};
+    }
+
+    iconv_close(cd);
+    return std::string(out.data(), out.size() - out_bytes);
+}
+#endif
 
 static std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
 
@@ -37,20 +68,29 @@ const char* EncodingConversion::GBK_LOCALE_NAME = "zh_CN.GBK";
 
 std::string EncodingConversion::ToString(const std::wstring& wstr)
 {
+#ifdef _WIN32
 	//std::locale::global(std::locale(""));
 	const mbs_facet_t& cvt = std::use_facet<mbs_facet_t>(std::locale());
 	std::wstring_convert<mbs_facet_t> converter(&cvt);
 	std::string str = converter.to_bytes(wstr);
 	return str;
+#else
+    return iconv_convert("WCHAR_T", "UTF-8", reinterpret_cast<const char*>(wstr.data()), wstr.size() * sizeof(wchar_t));
+#endif
 }
 
 std::wstring EncodingConversion::ToWString(const std::string& str)
 {
+#ifdef _WIN32
 	//std::locale::global(std::locale(""));
 	const mbs_facet_t& cvt = std::use_facet<mbs_facet_t>(std::locale());
 	std::wstring_convert<mbs_facet_t> converter(&cvt);
 	std::wstring wstr = converter.from_bytes(str);
 	return wstr;
+#else
+    std::string bytes = iconv_convert("UTF-8", "WCHAR_T", str.data(), str.size());
+    return std::wstring(reinterpret_cast<const wchar_t*>(bytes.data()), bytes.size() / sizeof(wchar_t));
+#endif
 }
 
 std::string EncodingConversion::ToGBK(const std::wstring& wstr)
@@ -98,6 +138,7 @@ std::wstring EncodingConversion::FromUTF8(const std::string& str)
 
 std::string EncodingConversion::GBKToUTF8(const std::string& str)
 {
+#ifdef _WIN32
 	//return ToUTF8(FromGBK(str));
 
 	if (str.empty()) return std::string();
@@ -121,10 +162,14 @@ std::string EncodingConversion::GBKToUTF8(const std::string& str)
 	}
 
 	return result;
+#else
+    return iconv_convert("GBK", "UTF-8", str.data(), str.size());
+#endif
 }
 
 std::string EncodingConversion::UTF8ToGBK(const std::string& str)
 {
+#ifdef _WIN32
 	//return ToGBK(FromUTF8(str));
 
 	if (str.empty()) return std::string();
@@ -143,12 +188,15 @@ std::string EncodingConversion::UTF8ToGBK(const std::string& str)
 	std::string result(len, 0);
 	WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &result[0], len, nullptr, nullptr);
 
-	// ÒÆ³ýÄ©Î²µÄnull×Ö·û
+	// ï¿½Æ³ï¿½Ä©Î²ï¿½ï¿½nullï¿½Ö·ï¿½
 	if (!result.empty() && result.back() == '\0') {
 		result.pop_back();
 	}
 
 	return result;
+#else
+    return iconv_convert("UTF-8", "GBK", str.data(), str.size());
+#endif
 }
 
 std::u16string EncodingConversion::UTF8toUTF16(const std::string& str)
@@ -239,6 +287,7 @@ std::u16string EncodingConversion::UTF32toUTF16(const std::u32string& str)
 
 int Util_ShellExecute(lua_State* pLuaVM)
 {
+#ifdef _WIN32
 	int argc = lua_gettop(pLuaVM);
 	HINSTANCE handle = ShellExecute(NULL,
 		std::wstring(convert.from_bytes(luaL_checkstring(pLuaVM, 1))).c_str(),
@@ -250,6 +299,9 @@ int Util_ShellExecute(lua_State* pLuaVM)
 	lua_pushboolean(pLuaVM, (intptr_t)handle > 32);
 
 	return 1;
+#else
+    return 1;
+#endif
 }
 
 int Util_GBKToUTF8(lua_State* pLuaVM)

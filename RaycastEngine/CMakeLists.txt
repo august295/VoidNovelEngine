@@ -42,8 +42,13 @@ else()
 endif()
 
 # 添加依赖，LuaBridge 仅头文件
-set(LibraryList "cJSON" "cpp-base64" "ImGUI" "Lua" "LuaBridge" "MicroPather" "Raylib" "SDL2")
-AddLibrary("${LibraryList}")
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+    set(LibraryList "cJSON" "cpp-base64" "ImGUI" "Lua" "LuaBridge" "MicroPather" "Raylib" "SDL2")
+    AddLibrary("${LibraryList}")
+else()
+    set(LibraryList "cJSON" "cpp-base64" "ImGUI" "Lua" "LuaBridge" "MicroPather" "Raylib")
+    AddLibrary("${LibraryList}")
+endif()
 
 # 创建项目
 set(ProjectName "RaycastEngine")

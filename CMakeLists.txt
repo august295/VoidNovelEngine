@@ -1,6 +1,15 @@
 ﻿# 要求最低Cmake版本
 cmake_minimum_required(VERSION 3.15)
 
+# 选项
+option(BUILD_VCPKG "Build use vcpkg" OFF)
+
+# vcpkg
+if(BUILD_VCPKG)
+    # CMAKE_TOOLCHAIN_FILE 设置需要在 project() 之前
+    include(cmake/module_vcpkg.cmake)
+endif(BUILD_VCPKG)
+
 # 项目名称
 set(UseProjectName "VoidNovelEngine")
 project(${UseProjectName})
@@ -45,6 +54,9 @@ set(CMAKE_RELWITHDEBINFO_POSTFIX "rd")
 include(${ROOT_DIR}/cmake/module.cmake)
 # external
 add_subdirectory(external)
+if(BUILD_VCPKG)
+    VCPKG_LOAD_3RDPARTY()
+endif()
 
 # 执行文件
 add_subdirectory(RaycastEngine)

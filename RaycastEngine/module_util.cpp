@@ -8,9 +8,12 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <string.h>
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#ifdef _WIN32
+    #define WIN32_LEAN_AND_MEAN
+    #include <Windows.h>
+#endif
 
 static std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
 
@@ -62,10 +65,14 @@ void init_util_module(lua_State* L)
 				.addFunction("UTF8ToUTF16", Util_UTF8ToUTF16)
 				.addFunction("SetConsoleShown", +[](bool flag)
 					{
+#ifdef _WIN32
 						ShowWindow(GetConsoleWindow(), flag ? SW_SHOW : SW_HIDE);
+#else
+#endif
 					})
 				.addFunction("LoadFileBuffer", +[](const char* path) -> CString*
 					{
+#ifdef _WIN32
 						std::string utf8Path = path;
 						int wideLen = MultiByteToWideChar(CP_UTF8, 0, utf8Path.c_str(), -1, nullptr, 0);
 						std::wstring widePath(wideLen, 0);
@@ -77,6 +84,17 @@ void init_util_module(lua_State* L)
 						buffer->val = ss.str();
 						file.close();
 						return buffer;
+#else
+                        // Linux/macOS: 原生支持UTF-8路径
+                        std::ifstream file(path, std::ios::binary);
+                        if (!file.is_open() || !file.good()) return nullptr;
+                        CString* buffer = new CString();
+                        std::stringstream ss;
+                        ss << file.rdbuf();
+                        buffer->val = ss.str();
+                        file.close();
+                        return buffer;
+#endif
 					})
 				.addFunction("UnloadFileBuffer", +[](CString* buffer)
 					{
