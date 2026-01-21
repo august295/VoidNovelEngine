@@ -132,5 +132,16 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
         msimg32.lib
         ws2_32.lib
     )
-else()
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_link_libraries(${ProjectName} PRIVATE ${LUA_LIBRARIES})
+    target_link_libraries(${ProjectName} PRIVATE raylib)
+    target_include_directories(${ProjectName} PRIVATE ${SDL2_INCLUDE_DIRS})
+    # SDL2
+    target_link_libraries(${ProjectName} PRIVATE ${SDL2_LIBRARIES})
+    find_package(sdl2-gfx CONFIG REQUIRED)
+    target_link_libraries(${ProjectName} PRIVATE SDL2::SDL2_gfx)
+    target_link_libraries(${ProjectName} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>)
+    target_link_libraries(${ProjectName} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>)
+    target_link_libraries(${ProjectName} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_net::SDL2_net>,SDL2_net::SDL2_net,SDL2_net::SDL2_net-static>)
+    target_link_libraries(${ProjectName} PRIVATE $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>)
 endif()
