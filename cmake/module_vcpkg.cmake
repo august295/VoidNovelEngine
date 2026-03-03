@@ -12,15 +12,12 @@ elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
     # 设置工具链文件
     set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
     set(VCPKG_TARGET_TRIPLET "x64-linux")
-    set(PKG_CONFIG_EXECUTABLE "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/tools/pkgconf/pkgconf")
-    set(PKG_CONFIG_PATH "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/lib/pkgconfig")
-    set(CMAKE_PREFIX_PATH "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}")
-    message(STATUS "VCPKG_ROOT: ${VCPKG_ROOT}")
-    message(STATUS "CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
-    message(STATUS "PKG_CONFIG_EXECUTABLE: ${PKG_CONFIG_EXECUTABLE}")
-    message(STATUS "PKG_CONFIG_PATH: ${PKG_CONFIG_PATH}")
-    message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+    set(VCPKG_MANIFEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 endif()
+message(STATUS "VCPKG_ROOT: ${VCPKG_ROOT}")
+message(STATUS "CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+message(STATUS "VCPKG_TARGET_TRIPLET: ${VCPKG_TARGET_TRIPLET}")
+message(STATUS "VCPKG_MANIFEST_DIR: ${VCPKG_MANIFEST_DIR}")
 
 ################################################################################
 # 3RDPARTY

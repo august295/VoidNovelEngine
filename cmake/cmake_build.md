@@ -46,37 +46,6 @@ echo 'export VCPKG_ROOT="$HOME/vcpkg"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-编译依赖文件统一下载 `vcpkg.json`
-
-```json
-{
-    "dependencies": [
-        "lua",
-        "raylib",
-        "sdl2",
-        "sdl2-ttf",
-        "sdl2-image",
-        "sdl2-mixer",
-        "sdl2-net",
-        "sdl2-gfx"
-    ],
-    "builtin-baseline": "6f29f12e82a8293156836ad81cc9bf5af41fe836",
-    "overrides": [
-        {
-            "name": "lua",
-            "version": "5.4.7"
-        },
-        {
-            "name": "raylib",
-            "version": "5.5"
-        },
-        {
-            "name": "sdl2",
-            "version": "2.32.4"
-        }
-    ]
-}
-```
 
 下载依赖
 
@@ -97,7 +66,7 @@ vcpkg install --x-install-root=$VCPKG_ROOT/installed
 
 ```
 # 构建工程
-cmake -B"build" -G"ninja" -D"CMAKE_BUILD_TYPE=Release"
+cmake -B"build" -G"Ninja" -D"BUILD_VCPKG=ON" -D"CMAKE_BUILD_TYPE=Release"
 
 # 编译工程
 cmake --build build --config Release -j 4 

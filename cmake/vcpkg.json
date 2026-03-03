@@ -1,0 +1,27 @@
+{
+    "dependencies": [
+        "lua",
+        "raylib",
+        "sdl2",
+        "sdl2-ttf",
+        "sdl2-image",
+        "sdl2-mixer",
+        "sdl2-net",
+        "sdl2-gfx"
+    ],
+    "builtin-baseline": "6f29f12e82a8293156836ad81cc9bf5af41fe836",
+    "overrides": [
+        {
+            "name": "lua",
+            "version": "5.4.7"
+        },
+        {
+            "name": "raylib",
+            "version": "5.5"
+        },
+        {
+            "name": "sdl2",
+            "version": "2.32.4"
+        }
+    ]
+}

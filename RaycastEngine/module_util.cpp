@@ -13,6 +13,9 @@
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
     #include <Windows.h>
+#else
+    #include <unistd.h>
+    #include <limits.h>
 #endif
 
 static std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
@@ -130,10 +133,19 @@ void init_util_module(lua_State* L)
 				.addFunction("ShellExecute", Util_ShellExecute)
 				.addFunction("GetExeFilePath", +[]() 
 					{
+#ifdef _WIN32
 						wchar_t filename[MAX_PATH];
 						if (GetModuleFileName(NULL, filename, MAX_PATH) > 0) 
 							return convert.to_bytes(filename);
 						return std::string();
+#else
+                        char exe_path[PATH_MAX];
+                        ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+                        if (len != -1) {
+                            exe_path[len] = '\0';
+                        }
+                        return std::string(exe_path);
+#endif
 					})
 			.endNamespace()
 		.endNamespace();
